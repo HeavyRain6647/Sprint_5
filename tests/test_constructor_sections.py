@@ -1,41 +1,29 @@
-def test_constructor_sections(driver, wait, login):
-    """
-    Проверяет работу вкладок в разделе «Конструктор»:
-    - «Булки»
-    - «Соусы»
-    - «Начинки»
-    """
-    # 1. Переход в конструктор
-    wait.until(EC.element_to_be_clickable(
-               (By.XPATH, "//a[text()='Конструктор']")).click()
-    wait.until(EC.url_contains("/constructor"))
+import pytest
+from selenium.webdriver.support import expected_conditions as EC
+from urls import CONSTRUCTOR_PAGE
+from locators import LOGO, SECTION_BUNS, SECTION_SAUCES, SECTION_FILLINGS
+from selenium.webdriver.common.by import By
 
-    # 2. Проверка вкладки «Булки»
-    buns_tab = wait.until(EC.element_to_be_clickable(
-                       (By.XPATH, "//div[text()='Булки']"))
-    buns_tab.click()
-    
-    # Проверка активности вкладки (например, наличие класса 'active')
-    assert "active" in buns_tab.get_attribute("class")
-    
-    # Дополнительно: проверяем видимость элементов раздела «Булки»
-    wait.until(EC.visibility_of_element_located(
-               (By.XPATH, "//div[@class='places__item' and .//div[text()='Булка']]"))
+class TestConstructorSections:
+    """Тесты для проверки секций (табов) в конструкторе."""
 
-    # 3. Проверка вкладки «Соусы»
-    sauces_tab = wait.until(EC.element_to_be_clickable(
-                 (By.XPATH, "//div[text()='Соусы']"))
-    sauces_tab.click()
-    
-    assert "active" in sauces_tab.get_attribute("class")
-    wait.until(EC.visibility_of_element_located(
-               (By.XPATH, "//div[@class='places__item' and .//div[text()='Соус']]"))
+    @pytest.mark.parametrize(
+    ("section_locator, section_name"), [
+        (SECTION_BUNS, "Булки"),
+        (SECTION_SAUCES, "Соусы"),
+        (SECTION_FILLINGS, "Начинки"),
+    ])
+    def test_section_navigation(self, driver, wait, login, section_locator, section_name):
+        """Проверяет переключение между секциями конструктора."""
+        driver.get(CONSTRUCTOR_PAGE)
+        wait.until(EC.visibility_of_element_located(LOGO))
 
-    # 4. Проверка вкладки «Начинки»
-    fillings_tab = wait.until(EC.element_to_be_clickable(
-                  (By.XPATH, "//div[text()='Начинки']"))
-    fillings_tab.click()
-    
-    assert "active" in fillings_tab.get_attribute("class")
-    wait.until(EC.visibility_of_element_located(
-               (By.XPATH, "//div[@class='places__item' and .//div[text()='Начинка']]"))
+        section_tab = wait.until(EC.element_to_be_clickable(section_locator))
+        section_tab.click()
+
+        assert "active" in section_tab.get_attribute("class"), (
+            f"Вкладка '{section_name}' не стала активной"
+        )
+
+        content_locator = (By.XPATH, f".//div[text()='{section_name}']")
+        wait.until(EC.visibility_of_element_located(content_locator))
