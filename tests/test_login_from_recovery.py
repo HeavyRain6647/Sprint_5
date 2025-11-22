@@ -14,9 +14,8 @@ class TestLoginFromRecovery:
         recovery_link = wait.until(EC.element_to_be_clickable(LINK_RECOVERY))
         recovery_link.click()
 
-        wait.until(EC.url_contains("/recovery"))
+        wait.until(EC.url_to_be(RECOVERY_PAGE)) # Ожидаем страницу восстановления пароля
         wait.until(EC.visibility_of_element_located(LINK_RETURN_TO_LOGIN))
-
 
         return_link = wait.until(EC.element_to_be_clickable(LINK_RETURN_TO_LOGIN))
         return_link.click()
@@ -26,4 +25,6 @@ class TestLoginFromRecovery:
         email_input = wait.until(EC.visibility_of_element_located(INPUT_EMAIL))
         assert email_input.is_displayed(), "Поле email не отображается"
 
-        login_button = wait.until(EC.visibility_of_element
+        # ИСПРАВЛЕНО: Завершен синтаксис и добавлен assert на видимость кнопки
+        login_button = wait.until(EC.visibility_of_element_located(BUTTON_LOGIN))
+        assert login_button.is_displayed(), "Кнопка 'Войти' не отображается"

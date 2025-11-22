@@ -1,18 +1,34 @@
+import pytest
+from selenium.webdriver.support import expected_conditions as EC
+from urls import BASE_URL, LOGIN_PAGE
+from locators import (
+    LINK_REGISTER,
+    INPUT_NAME,
+    INPUT_EMAIL,
+    INPUT_PASSWORD,
+    BUTTON_REGISTER
+)
+
 def test_registration_success(driver, wait, user_data):
     """Успешная регистрация с корректными данными."""
-    wait.until(EC.element_to_be_clickable
-              ((By.LINK_TEXT, "Зарегистрироваться")).click()
+    driver.get(BASE_URL)
+    
+    # 1. Переход на страницу регистрации
+    wait.until(EC.element_to_be_clickable(LINK_REGISTER)).click()
 
 
-    driver.find_element(By.NAME, "name").send_keys("Тест Пользователь")
-    driver.find_element(By.NAME, "email").send_keys(user_data["email"])
-    driver.find_element(By.NAME, "password").send_keys(user_data["password"])
+    # 2. Ввод корректных данных
+    driver.find_element(*INPUT_NAME).send_keys("Тест Пользователь")
+    driver.find_element(*INPUT_EMAIL).send_keys(user_data["email"])
+    driver.find_element(*INPUT_PASSWORD).send_keys(user_data["password"])
 
 
-    wait.until(EC.element_to_be_clickable
-              ((By.XPATH, "//button[text()='Зарегистрироваться']")).click()
+    # 3. Клик по кнопке "Зарегистрироваться"
+    wait.until(EC.element_to_be_clickable(BUTTON_REGISTER)).click()
 
 
-    wait.until(EC.visibility_of_element_located
-              ((By.PARTIAL_LINK_TEXT, "Профиль")))
-    assert "Профиль" in driver.page_source
+    # 4. Проверка редиректа на страницу входа
+    wait.until(EC.url_to_be(LOGIN_PAGE))
+    
+    # ИСПРАВЛЕНО: Проверка успешной регистрации через редирект
+    assert driver.current_url == LOGIN_PAGE, "Успешная регистрация не привела на страницу входа"
